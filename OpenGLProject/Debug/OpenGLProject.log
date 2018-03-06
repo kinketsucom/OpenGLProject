@@ -1,6 +1,6 @@
 ﻿  main.cpp
-c:\users\sekib\documents\undercreation\researchproject\openglproject\openglproject\main.cpp(21): warning C4244: '初期化中': 'double' から 'float' への変換です。データが失われる可能性があります。
-c:\users\sekib\documents\undercreation\researchproject\openglproject\openglproject\main.cpp(304): warning C4244: '初期化中': '__int64' から 'float' への変換です。データが失われる可能性があります。
-c:\users\sekib\documents\undercreation\researchproject\openglproject\openglproject\main.cpp(313): warning C4244: '初期化中': '__int64' から 'float' への変換です。データが失われる可能性があります。
-c:\users\sekib\documents\undercreation\researchproject\openglproject\openglproject\main.cpp(347): warning C4244: '=': 'double' から 'float' への変換です。データが失われる可能性があります。
-  OpenGLProject.vcxproj -> C:\Users\sekib\Documents\UnderCreation\ResearchProject\OpenGLProject\Debug\OpenGLProject.exe
+c:\users\sekib\documents\undercreation\openglproject\openglproject\main.cpp(21): warning C4244: '初期化中': 'double' から 'float' への変換です。データが失われる可能性があります。
+c:\users\sekib\documents\undercreation\openglproject\openglproject\main.cpp(304): warning C4244: '初期化中': '__int64' から 'float' への変換です。データが失われる可能性があります。
+c:\users\sekib\documents\undercreation\openglproject\openglproject\main.cpp(313): warning C4244: '初期化中': '__int64' から 'float' への変換です。データが失われる可能性があります。
+c:\users\sekib\documents\undercreation\openglproject\openglproject\main.cpp(347): warning C4244: '=': 'double' から 'float' への変換です。データが失われる可能性があります。
+  OpenGLProject.vcxproj -> C:\Users\sekib\Documents\UnderCreation\OpenGLProject\Debug\OpenGLProject.exe

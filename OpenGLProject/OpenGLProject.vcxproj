@@ -122,6 +122,10 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Resource\boundary_sol.d" />
+    <None Include="Resource\meshparam.d" />
+    <None Include="Resource\meshpoint.d" />
+    <None Include="Resource\meshtriangle.d" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

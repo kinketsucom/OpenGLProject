@@ -26,5 +26,17 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+    <None Include="Resource\meshtriangle.d">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="Resource\boundary_sol.d">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="Resource\meshparam.d">
+      <Filter>リソース ファイル</Filter>
+    </None>
+    <None Include="Resource\meshpoint.d">
+      <Filter>リソース ファイル</Filter>
+    </None>
   </ItemGroup>
 </Project>
