@@ -324,12 +324,10 @@ void loop() {
 */
 int main(int argc, char *argv[])
 {
-	cout << "hogehogehogheo" << endl;
-
 	printf("データを読み込み\n");
 	///////////////////ファイルの読み込み////////////////////
 	//meshpoint
-	std::ifstream fin("meshpoint.d");
+	std::ifstream fin(".\\Resource\\meshpoint.d");
 	std::string str;
 	if (!fin) {
 		printf("meshpointファイルが存在しません");
@@ -351,7 +349,7 @@ int main(int argc, char *argv[])
 	}
 
 	//meshtriangle
-	std::ifstream fin2("meshtriangle.d");
+	std::ifstream fin2(".\\Resource\\meshtriangle.d");
 	if (!fin2) {
 		printf("meshtriangleファイルが存在しません");
 		system("pause");
@@ -372,7 +370,7 @@ int main(int argc, char *argv[])
 	}
 	/*
 	//boundary_sol
-	std::ifstream fin3( "boundary_sol.d" );
+	std::ifstream fin3( ".\\Resource\\boundary_sol.d" );
 	if( !fin3 ){
 	printf("boundary_solファイルが存在しません");
 	system("pause");
