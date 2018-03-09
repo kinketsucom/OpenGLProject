@@ -8,6 +8,7 @@
 #include "Vector.h"//自前で用意したもの
 #include <fstream>
 #include <sstream>
+#include <math.h>
 
 using namespace std;
 
@@ -17,13 +18,11 @@ static int mouse_x, mouse_y;    /* ドラッグ開始時のマウスの位置 */
 static GLuint cubelist;            /* 立方体のリスト */
 GLfloat move_size = 1.0;
 
-static int samplerate = 80;
-static float step_duration = 1000000.0 / samplerate; //μ秒
-std::chrono::system_clock::time_point  start, end_time, start_all, end_all; // 型は auto で可
 
 
-																			//境界パラメータ
-																			//ここではパラメータ要素数が418です
+
+//境界パラメータ
+//ここではパラメータ要素数が418です
 static float meshpoint[418][3];//メッシュのnode番号,３軸
 static int meshtriangle[640][3];//三角形番号,さん各駅をなすnode番号
 static float boundary_sol[640][16000];//三角形番号,時間ステップ数
@@ -31,7 +30,20 @@ static float mesh_point_center[640][3];//三角形番号,3軸
 static float mesh_point_center_norm[640][3];//三角形番号,三軸
 static float mesh_size[640];
 
+//波のパラメータ
+//入射波は1-cos
+static float wave_speed = 340;
+int samplerate = 8000;
+float size = 1.0f;
+float pi = (float)acos(-1);
+float del_t = 1.0f / samplerate;
+float lambda = 10.0f *del_t;
+float time_len = 2.0;
+float f[16000 * 2];
 
+//必要かと思ったもの
+//static float step_duration = (float)18000000.0 / samplerate; //μ秒
+std::chrono::system_clock::time_point  start, end_time, start_all, end_all; // 型は auto で可
 
 
 class Camera {
@@ -422,6 +434,16 @@ int main(int argc, char *argv[])
 		mesh_point_center_norm[i][1] = norm.y;
 		mesh_point_center_norm[i][2] = norm.z;
 	}
+	////////////////////重心の位置、法線ベクトルの計算終了////////////////////
+	///////////////////////入射波の計算///////////////////////////
+	for (int t = 0; t < samplerate*(int)time_len; t++) {
+		//			if (t < Static.samplerate * lambda) {
+		f[t] = 1 - cos(2 * pi / lambda * t / samplerate);
+		//			} else {
+		//				Static.f [t] = 0;
+		//			}
+	}
+	///////////////////////入射波の計算終了///////////////////////////
 
 
 	//    std::thread t1(loop);
