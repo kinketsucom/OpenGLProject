@@ -9,6 +9,7 @@
 #include <fstream>
 #include <sstream>
 #include <math.h>
+#include<fstream>
 
 using namespace std;
 
@@ -49,6 +50,7 @@ float f[16000 * 2];
 //static float step_duration = (float)18000000.0 / samplerate; //μ秒
 std::chrono::system_clock::time_point  start, end_time, start_all, end_all; // 型は auto で可
 
+ofstream outputfile("./Output/test.txt");
 
 class Camera {
 public:
@@ -240,6 +242,8 @@ void key_func(unsigned char key, int x, int y)
 	switch (toupper(key)) {
 	case 0x1b:    /* ＥＳＣキー */
 				  /* プログラムを終了 */
+
+		outputfile.close();
 		exit(0);
 		break;
 	case 'P':    /* Pキー */
@@ -292,7 +296,6 @@ void skey_func(int key, int x, int y)
 	glutPostRedisplay();
 }
 
-
 void loop() {
 
 	//    int j = 0;
@@ -326,11 +329,9 @@ void loop() {
 				if (delay_k > 0) {
 					//これが新しいやつ
 					u_array += - SL_k(k, i, dot_k, r_k);
-				}
-
-										
+				}							
 			}
-
+			outputfile << u_array << endl;
 
 			
 			end_time = std::chrono::system_clock::now();  // 計測終了時間
@@ -487,7 +488,7 @@ int main(int argc, char *argv[])
 	///////////////////////入射波の計算終了///////////////////////////
 
 
-	//    std::thread t1(loop);
+	std::thread t1(loop);
 	/* glutの初期化 */
 	glutInit(&argc, argv);
 

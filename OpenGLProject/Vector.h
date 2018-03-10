@@ -32,7 +32,6 @@ public:
 		return sqrtf(x*x + y * y + z * z);
 	}
 	float Dot(VECTOR3 dvec) {
-
 		return ((this)->x)*dvec.x + ((this)->y)*dvec.y + ((this)->z)*dvec.z;
 	}
 
