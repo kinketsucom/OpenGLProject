@@ -313,8 +313,9 @@ void loop() {
 
 	if (true) {//ここはスタートした場合を考えている
 		start_all = std::chrono::system_clock::now();
-		for (int i = 0; i<8000; i++) {
+		for (int i = 0; i<16000; i++) {
 			start = std::chrono::system_clock::now(); // 計測開始時間
+			cout << "step:" << i << endl;
 			float u_array = 0;
 			VECTOR3 position = cam.position;
 			
@@ -331,6 +332,8 @@ void loop() {
 					u_array += - SL_k(k, i, dot_k, r_k);
 				}							
 			}
+
+			u_array += f[i];
 			outputfile << u_array << endl;
 
 			
