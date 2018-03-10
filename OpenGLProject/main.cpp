@@ -318,7 +318,7 @@ void loop() {
 			for (int k = 0; k<640; k++) {//三万ループが限界?
 				//内点計算
 				VECTOR3 mesh_k_center = { mesh_point_center[k][0], mesh_point_center[k][1], mesh_point_center[k][2] };
-				float r_k =positionmesh_point_center_array[i]);
+				float r_k =position.Distance(mesh_k_center);
 				float dot_k = Vector3.Dot(position - Static.mesh_point_center_array[i], Static.mesh_point_center_norm_array[i]);
 				float delayf_k = start_frame - Static.samplerate * r / wave_speed;
 				int delay_k = (int)delayf_k;
