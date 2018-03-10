@@ -18,6 +18,9 @@ static int mouse_x, mouse_y;    /* ドラッグ開始時のマウスの位置 */
 static GLuint cubelist;            /* 立方体のリスト */
 GLfloat move_size = 1.0;
 
+//関数プロトタイプ宣言
+float SL_k(int mesh_k, int step, float dot_k, float r_k);
+float FjT_k(int mesh_k, float dot_k, float r, float T);
 
 
 
@@ -29,6 +32,7 @@ static float boundary_sol[640][16000];//三角形番号,時間ステップ数
 static float mesh_point_center[640][3];//三角形番号,3軸
 static float mesh_point_center_norm[640][3];//三角形番号,三軸
 static float mesh_size[640];
+static float bc_u[640][16000];
 
 //波のパラメータ
 //入射波は1-cos
@@ -308,9 +312,12 @@ void loop() {
 		start_all = std::chrono::system_clock::now();
 		for (int i = 0; i<8000; i++) {
 			start = std::chrono::system_clock::now(); // 計測開始時間
-			printf("step%d\n", i);
-			for (int k = 0; k<30000; k++) {//三万ループが限界?
-										   //ここら辺で内点計算したい
+
+			for (int k = 0; k<640; k++) {//三万ループが限界?
+				//内点計算
+
+
+										
 			}
 			end_time = std::chrono::system_clock::now();  // 計測終了時間
 			float elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start).count();
@@ -329,6 +336,26 @@ void loop() {
 
 }
 
+
+
+float SL_k(int mesh_k, int step, float dot_k, float r_k) {//メッシュkについて計算する
+	float result = 0.0f;
+	float del_t = 1.0f / samplerate;
+	int n = step;
+	int m1 = 0;
+	int m2 = 0;
+	m1 = (int)(n - r_k * samplerate / wave_speed) + 1;
+	m2 = (int)m2-1;
+	result = FjT_k(mesh_k, dot_k, r_k, (n - m1 + 1)) * bc_u[mesh_k][m1] + FjT_k(mesh_k, dot_k, r_k, (m2 - n + 1))*bc_u[mesh_k][m2];
+	return result;
+}
+
+float FjT_k(int mesh_k, float dot_k, float r, float T) {//SecondLayer計算用
+	float del_t = 1.0f / samplerate;
+	float result = 0.0f;
+	result = - dot_k * mesh_size[mesh_k] * T / (4.0f * pi * pow(r, 3));
+	return result;
+}
 
 /*
 *    main関数
