@@ -318,17 +318,21 @@ void loop() {
 			for (int k = 0; k<640; k++) {//三万ループが限界?
 				//内点計算
 				VECTOR3 mesh_k_center = { mesh_point_center[k][0], mesh_point_center[k][1], mesh_point_center[k][2] };
+				VECTOR3 mesh_k_norm = { mesh_point_center_norm[k][0], mesh_point_center_norm[k][1], mesh_point_center_norm[k][2] };
 				float r_k =position.Distance(mesh_k_center);
-				float dot_k = Vector3.Dot(position - Static.mesh_point_center_array[i], Static.mesh_point_center_norm_array[i]);
-				float delayf_k = start_frame - Static.samplerate * r / wave_speed;
+				float dot_k = (position - mesh_k_center).Dot(mesh_k_norm);
+				float delayf_k = i - samplerate * r_k / wave_speed;
 				int delay_k = (int)delayf_k;
 				if (delay_k > 0) {
 					//これが新しいやつ
-					u_array += - SL_k(i, dot_k, r_k);
+					u_array += - SL_k(k, i, dot_k, r_k);
 				}
 
 										
 			}
+
+
+			
 			end_time = std::chrono::system_clock::now();  // 計測終了時間
 			float elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start).count();
 			//            if(elapsed>=step_duration){
