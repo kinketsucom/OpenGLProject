@@ -25,6 +25,13 @@ public:
 	float Magnitude() {//大きさ
 		return sqrt(x*x + y * y + z * z);
 	};
+	float Distance(VECTOR3 dvec) {
+		float x = ((this)->x) - dvec.x;
+		float y = ((this)->y) - dvec.y;
+		float z = ((this)->z) - dvec.z;
+		return sqrtf(x*x + y * y + z * z);
+	}
+
 	VECTOR3 Cross(VECTOR3 dvec) {//外積
 		VECTOR3 v3;
 
