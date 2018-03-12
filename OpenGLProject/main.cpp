@@ -23,6 +23,7 @@ GLfloat move_size = 1.0;
 float SL_k(int mesh_k, int step, float dot_k, float r_k);
 float FjT_k(int mesh_k, float dot_k, float r, float T);
 
+bool start_bool = false;
 
 
 //境界パラメータ
@@ -71,6 +72,31 @@ public:
 
 /*カメラオブジェクトのインスタンス化*/
 Camera cam;
+
+/*
+* キーが押されたときの処理
+*/
+void key_func(unsigned char key, int x, int y)
+{
+	switch (toupper(key)) {
+	case 0x1b:    /* ＥＳＣキー */
+				  /* プログラムを終了 */
+
+		outputfile.close();
+		exit(0);
+		break;
+
+	case 'T':
+		start_bool = !start_bool;
+		cout << start_bool << endl;
+		break;
+
+	case 'P':    /* Pキー */
+		cam.showDetail();
+		break;
+	}
+}
+
 
 /*
 *    画面更新時の処理
@@ -234,23 +260,7 @@ void drag_func(int x, int y)
 	glutPostRedisplay();
 }
 
-/*
-* キーが押されたときの処理
-*/
-void key_func(unsigned char key, int x, int y)
-{
-	switch (toupper(key)) {
-	case 0x1b:    /* ＥＳＣキー */
-				  /* プログラムを終了 */
 
-		outputfile.close();
-		exit(0);
-		break;
-	case 'P':    /* Pキー */
-		cam.showDetail();
-		break;
-	}
-}
 
 /*
 *    特殊キーが押されたときの処理
@@ -312,44 +322,48 @@ void loop() {
 	//    }
 
 	if (true) {//ここはスタートした場合を考えている
-		start_all = std::chrono::system_clock::now();
-		for (int i = 0; i<16000; i++) {
-			start = std::chrono::system_clock::now(); // 計測開始時間
-			cout << "step:" << i << endl;
-			float u_array = 0;
-			VECTOR3 position = cam.position;
-			
-			for (int k = 0; k<640; k++) {//三万ループが限界?
-				//内点計算
-				VECTOR3 mesh_k_center = { mesh_point_center[k][0], mesh_point_center[k][1], mesh_point_center[k][2] };
-				VECTOR3 mesh_k_norm = { mesh_point_center_norm[k][0], mesh_point_center_norm[k][1], mesh_point_center_norm[k][2] };
-				float r_k =position.Distance(mesh_k_center);
-				float dot_k = (position - mesh_k_center).Dot(mesh_k_norm);
-				float delayf_k = i - samplerate * r_k / wave_speed;
-				int delay_k = (int)delayf_k;
-				if (delay_k > 0) {
-					//これが新しいやつ
-					u_array += - SL_k(k, i, dot_k, r_k);
-				}							
+
+		while (1) {
+			if (start_bool) {
+				start_all = std::chrono::system_clock::now();
+				for (int i = 0; i < 16000; i++) {
+					start = std::chrono::system_clock::now(); // 計測開始時間
+					//cout << "step:" << i << endl;
+					float u_array = 0;
+					VECTOR3 position = cam.position;
+
+					for (int k = 0; k < 640; k++) {//各メッシュに対する計算ループ
+						//内点計算
+						VECTOR3 mesh_k_center = { mesh_point_center[k][0], mesh_point_center[k][1], mesh_point_center[k][2] };
+						VECTOR3 mesh_k_norm = { mesh_point_center_norm[k][0], mesh_point_center_norm[k][1], mesh_point_center_norm[k][2] };
+						//float r_k = position.Distance(mesh_k_center);
+						//float dot_k = (position - mesh_k_center).Dot(mesh_k_norm);
+						//float delayf_k = i - samplerate * r_k / wave_speed;
+						//int delay_k = (int)delayf_k;
+						//if (delay_k > 0) {
+						//	//これが新しいやつ
+						//	u_array += -SL_k(k, i, dot_k, r_k);
+						//}
+					}
+
+					u_array += f[i];
+					outputfile << u_array << endl;
+
+
+					end_time = std::chrono::system_clock::now();  // 計測終了時間
+					float elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start).count();
+					//            if(elapsed>=step_duration){
+					//                printf("*over*%1f [μs]\n",elapsed);
+					//            }else{
+					//                printf("%1f [μs]\n",elapsed);
+					//                usleep(step_duration-elapsed-1);
+					//            }
+				}
+				end_all = std::chrono::system_clock::now();  // 計測終了時間
+				float elapsed_all = std::chrono::duration_cast<std::chrono::milliseconds>(end_all - start_all).count(); //処理に要した時間をミリ秒に変換
+				printf("all_end:%1f [ms]\n", elapsed_all);
 			}
-
-			u_array += f[i];
-			outputfile << u_array << endl;
-
-			
-			end_time = std::chrono::system_clock::now();  // 計測終了時間
-			float elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start).count();
-			//            if(elapsed>=step_duration){
-			//                printf("*over*%1f [μs]\n",elapsed);
-			//            }else{
-			//                printf("%1f [μs]\n",elapsed);
-			//                usleep(step_duration-elapsed-1);
-			//            }
 		}
-		end_all = std::chrono::system_clock::now();  // 計測終了時間
-		float elapsed_all = std::chrono::duration_cast<std::chrono::milliseconds>(end_all - start_all).count(); //処理に要した時間をミリ秒に変換
-		printf("all_end:%1f [ms]\n", elapsed_all);
-
 	}
 
 }
@@ -405,6 +419,11 @@ int main(int argc, char *argv[])
 		}
 	}
 
+	std::stringstream strstream;
+	strstream << fin.rdbuf();
+	fin.close();
+
+
 	//meshtriangle
 	std::ifstream fin2(".\\Resource\\meshtriangle.d");
 	if (!fin2) {
@@ -425,6 +444,10 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
+
+	strstream << fin2.rdbuf();
+	fin2.close();
+
 	/*
 	//boundary_sol
 	std::ifstream fin3( ".\\Resource\\boundary_sol.d" );
@@ -452,12 +475,6 @@ int main(int argc, char *argv[])
 	strstream << fin3.rdbuf();
 	fin3.close();
 	*/
-	std::stringstream strstream;
-	strstream << fin.rdbuf();
-	fin.close();
-	strstream << fin2.rdbuf();
-	fin2.close();
-
 	////////////////////ファイル読み込み終了////////////////////
 
 	////////////////////重心の位置、法線ベクトルの計算////////////////////
