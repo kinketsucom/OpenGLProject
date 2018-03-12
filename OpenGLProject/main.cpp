@@ -35,6 +35,8 @@ static float mesh_point_center[640][3];//三角形番号,3軸
 static float mesh_point_center_norm[640][3];//三角形番号,三軸
 static float mesh_size[640];
 static float bc_u[640][16000];
+static VECTOR3 mesh_k_center[640];
+static VECTOR3 mesh_k_norm[640];
 
 //波のパラメータ
 //入射波は1-cos
@@ -478,23 +480,24 @@ int main(int argc, char *argv[])
 	////////////////////ファイル読み込み終了////////////////////
 
 	////////////////////重心の位置、法線ベクトルの計算////////////////////
-	for (int i = 0; i<640; i++) {//重心中心取得
-		VECTOR3 point0 = { meshpoint[meshtriangle[i][0]][0] , meshpoint[meshtriangle[i][0]][1],meshpoint[meshtriangle[i][0]][2] };
-		VECTOR3 point1 = { meshpoint[meshtriangle[i][1]][0],meshpoint[meshtriangle[i][1]][1],meshpoint[meshtriangle[i][1]][2] };
-		VECTOR3 point2 = { meshpoint[meshtriangle[i][2]][0],meshpoint[meshtriangle[i][2]][1],meshpoint[meshtriangle[i][2]][2] };
+	for (int k = 0; k<640; k++) {//重心中心取得
+		VECTOR3 point0 = { meshpoint[meshtriangle[k][0]][0],meshpoint[meshtriangle[k][0]][1],meshpoint[meshtriangle[k][0]][2] };
+		VECTOR3 point1 = { meshpoint[meshtriangle[k][1]][0],meshpoint[meshtriangle[k][1]][1],meshpoint[meshtriangle[k][1]][2] };
+		VECTOR3 point2 = { meshpoint[meshtriangle[k][2]][0],meshpoint[meshtriangle[k][2]][1],meshpoint[meshtriangle[k][2]][2] };
 		//重心取得
-		mesh_point_center[i][0] = (point1.x + point2.x + point0.x) / 3;
-		mesh_point_center[i][1] = (point1.y + point2.y + point0.y) / 3;
-		mesh_point_center[i][2] = (point1.z + point2.z + point0.z) / 3;
+		mesh_point_center[k][0] = (point1.x + point2.x + point0.x) / 3;
+		mesh_point_center[k][1] = (point1.y + point2.y + point0.y) / 3;
+		mesh_point_center[k][2] = (point1.z + point2.z + point0.z) / 3;
 		//メッシュの面積計算
 		VECTOR3 point0_1 = point1 - point0;
 		VECTOR3 point0_2 = point2 - point0;
-		mesh_size[i] = (point0_1.Cross(point0_2)).Magnitude() / 2;
+		mesh_size[k] = (point0_1.Cross(point0_2)).Magnitude() / 2;
 		//法線ベクトル(ちょっと未確認)
 		VECTOR3 norm = point0_1.Cross(point0_2) / (point0_1.Cross(point0_2)).Magnitude();
-		mesh_point_center_norm[i][0] = norm.x;
-		mesh_point_center_norm[i][1] = norm.y;
-		mesh_point_center_norm[i][2] = norm.z;
+		mesh_point_center_norm[k][0] = norm.x;
+		mesh_point_center_norm[k][1] = norm.y;
+		mesh_point_center_norm[k][2] = norm.z;
+		mesh_k_center[k] = norm;
 	}
 	////////////////////重心の位置、法線ベクトルの計算終了////////////////////
 	///////////////////////入射波の計算///////////////////////////
