@@ -23,7 +23,12 @@ GLfloat move_size = 1.0;
 float SL_k(int mesh_k, int step, float dot_k, float r_k);
 float FjT_k(int mesh_k, float dot_k, float r, float T);
 
+//計算フェーズに必要なもの
 bool start_bool = false;
+float dot_k = 0;
+float r_k = 0;
+float delayf_k_part[640];
+float delayf_k[640];
 
 
 //境界パラメータ
@@ -31,8 +36,8 @@ bool start_bool = false;
 static float meshpoint[418][3];//メッシュのnode番号,３軸
 static int meshtriangle[640][3];//三角形番号,さん各駅をなすnode番号
 static float boundary_sol[640][16000];//三角形番号,時間ステップ数
-static float mesh_point_center[640][3];//三角形番号,3軸
-static float mesh_point_center_norm[640][3];//三角形番号,三軸
+//static float mesh_point_center[640][3];//三角形番号,3軸
+//static float mesh_point_center_norm[640][3];//三角形番号,三軸
 static float mesh_size[640];
 static float bc_u[640][16000];
 static VECTOR3 mesh_k_center[640];
@@ -334,18 +339,31 @@ void loop() {
 					float u_array = 0;
 					VECTOR3 position = cam.position;
 
-					for (int k = 0; k < 640; k++) {//各メッシュに対する計算ループ
+					if (i % 60 == 0) {//位置情報更新
 						//内点計算
-						VECTOR3 mesh_k_center = { mesh_point_center[k][0], mesh_point_center[k][1], mesh_point_center[k][2] };
-						VECTOR3 mesh_k_norm = { mesh_point_center_norm[k][0], mesh_point_center_norm[k][1], mesh_point_center_norm[k][2] };
-						//float r_k = position.Distance(mesh_k_center);
-						//float dot_k = (position - mesh_k_center).Dot(mesh_k_norm);
-						//float delayf_k = i - samplerate * r_k / wave_speed;
-						//int delay_k = (int)delayf_k;
-						//if (delay_k > 0) {
-						//	//これが新しいやつ
-						//	u_array += -SL_k(k, i, dot_k, r_k);
-						//}
+						for (int k = 0; k < 640; k++) {//各メッシュに対する計算ループ
+							dot_k = (position - mesh_k_center[k]).Dot(mesh_k_norm[k]);
+							r_k = position.Distance(mesh_k_center[k]);
+							//r_k = position.DummyDistance(mesh_k_center[k]);//ダミー
+							delayf_k_part[k] = samplerate * r_k / wave_speed;
+							delayf_k[k] = i - delayf_k_part[k];
+							int delay_k = (int)delayf_k;
+							if (delay_k > 0) {
+								//これが新しいやつ
+								u_array += -SL_k(k, i, dot_k, r_k);
+							}
+						}
+
+					}else {//位置は同じ
+						for (int k = 0; k < 640; k++) {//各メッシュに対する計算ループ
+							//内点計算
+							delayf_k[k] = i - delayf_k_part[k];
+							int delay_k = (int)delayf_k;
+							if (delay_k > 0) {
+								//これが新しいやつ
+								u_array += -SL_k(k, i, dot_k, r_k);
+							}
+						}
 					}
 
 					u_array += f[i];
@@ -485,18 +503,19 @@ int main(int argc, char *argv[])
 		VECTOR3 point1 = { meshpoint[meshtriangle[k][1]][0],meshpoint[meshtriangle[k][1]][1],meshpoint[meshtriangle[k][1]][2] };
 		VECTOR3 point2 = { meshpoint[meshtriangle[k][2]][0],meshpoint[meshtriangle[k][2]][1],meshpoint[meshtriangle[k][2]][2] };
 		//重心取得
-		mesh_point_center[k][0] = (point1.x + point2.x + point0.x) / 3;
-		mesh_point_center[k][1] = (point1.y + point2.y + point0.y) / 3;
-		mesh_point_center[k][2] = (point1.z + point2.z + point0.z) / 3;
+		//mesh_point_center[k][0] = (point1.x + point2.x + point0.x) / 3;
+		//mesh_point_center[k][1] = (point1.y + point2.y + point0.y) / 3;
+		//mesh_point_center[k][2] = (point1.z + point2.z + point0.z) / 3;
+		mesh_k_center[k] = (point0 + point1 + point2) / 3;
 		//メッシュの面積計算
 		VECTOR3 point0_1 = point1 - point0;
 		VECTOR3 point0_2 = point2 - point0;
 		mesh_size[k] = (point0_1.Cross(point0_2)).Magnitude() / 2;
 		//法線ベクトル(ちょっと未確認)
 		VECTOR3 norm = point0_1.Cross(point0_2) / (point0_1.Cross(point0_2)).Magnitude();
-		mesh_point_center_norm[k][0] = norm.x;
+		/*mesh_point_center_norm[k][0] = norm.x;
 		mesh_point_center_norm[k][1] = norm.y;
-		mesh_point_center_norm[k][2] = norm.z;
+		mesh_point_center_norm[k][2] = norm.z;*/
 		mesh_k_center[k] = norm;
 	}
 	////////////////////重心の位置、法線ベクトルの計算終了////////////////////
