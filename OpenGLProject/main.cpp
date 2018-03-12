@@ -405,7 +405,7 @@ float SL_k(int mesh_k, int step, float dot_k, float r_k) {//ƒƒbƒVƒ…k‚É‚Â‚¢‚ÄŒv
 float FjT_k(int mesh_k, float dot_k, float r, float T) {//SecondLayerŒvZ—p
 	float del_t = 1.0f / samplerate;
 	float result = 0.0f;
-	result = - dot_k * mesh_size[mesh_k] * T / (4.0f * pi * pow(r, 3));
+	result = - dot_k * mesh_size[mesh_k] * T / (4.0f * pi * r*r*r);
 	return result;
 }
 
