@@ -29,7 +29,7 @@ public:
 		float x = ((this)->x) - dvec.x;
 		float y = ((this)->y) - dvec.y;
 		float z = ((this)->z) - dvec.z;
-		return sqrtf(x*x + y * y + z * z);
+		return sqrt(x*x + y * y + z * z);
 	}
 	float DummyDistance(VECTOR3 dvec) {//距離
 		float x = ((this)->x) - dvec.x;

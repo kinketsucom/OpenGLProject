@@ -95,7 +95,13 @@ void key_func(unsigned char key, int x, int y)
 
 	case 'T':
 		start_bool = !start_bool;
-		cout << start_bool << endl;
+		if (start_bool) {
+			cout << "start" << endl;
+		}
+		else {
+			cout << "stop" << endl;
+		}
+		
 		break;
 
 	case 'P':    /* Pキー */
@@ -328,7 +334,6 @@ void loop() {
 	////        printf("%1f [ms]\n",elapsed);
 	//    }
 
-	if (true) {//ここはスタートした場合を考えている
 
 		while (1) {
 			if (start_bool) {
@@ -338,7 +343,6 @@ void loop() {
 					//cout << "step:" << i << endl;
 					float u_array = 0;
 					VECTOR3 position = cam.position;
-
 					if (i % 60 == 0) {//位置情報更新
 						//内点計算
 						for (int k = 0; k < 640; k++) {//各メッシュに対する計算ループ
@@ -353,7 +357,6 @@ void loop() {
 								u_array += -SL_k(k, i, dot_k, r_k);
 							}
 						}
-
 					}else {//位置は同じ
 						for (int k = 0; k < 640; k++) {//各メッシュに対する計算ループ
 							//内点計算
@@ -366,7 +369,7 @@ void loop() {
 						}
 					}
 
-					u_array += f[i];
+					//u_array += f[i];
 					outputfile << u_array << endl;
 
 
@@ -379,12 +382,15 @@ void loop() {
 					//                usleep(step_duration-elapsed-1);
 					//            }
 				}
+
+				//テストケース
+				start_bool = false;
+
 				end_all = std::chrono::system_clock::now();  // 計測終了時間
 				float elapsed_all = std::chrono::duration_cast<std::chrono::milliseconds>(end_all - start_all).count(); //処理に要した時間をミリ秒に変換
 				printf("all_end:%1f [ms]\n", elapsed_all);
 			}
 		}
-	}
 
 }
 
@@ -468,33 +474,32 @@ int main(int argc, char *argv[])
 	strstream << fin2.rdbuf();
 	fin2.close();
 
-	/*
+	
 	//boundary_sol
 	std::ifstream fin3( ".\\Resource\\boundary_sol.d" );
-	if( !fin3 ){
-	printf("boundary_solファイルが存在しません");
-	system("pause");
-	return 1;
-	}else{
-	int node = 0;
-	while (getline(fin3, str,' '))
-	{
-	if(str == "" || str == "\n"){//空文字と改行コードをはじく
-	continue;
-	}else{
-	int log = node%1024000;
-	if(log ==0){
-	std::cout << std::to_string(node/102400) << "%" << std::endl;
-	}
-	//640要素でループ
-	boundary_sol[node%640][node/640] = stoi(str); //node,step
-	node += 1;
-	}
-	}
-	}
+		if( !fin3 ){
+			printf("boundary_solファイルが存在しません");
+			system("pause");
+			return 1;
+		}else{
+			int node = 0;
+			while (getline(fin3, str,' ')){
+				if(str == "" || str == "\n"){//空文字と改行コードをはじく
+					continue;
+				}else{
+					int log = node%1024000;
+					if(log ==0){
+						std::cout << std::to_string(node/102400) << "%" << std::endl;
+					}
+					//640要素でループ
+					boundary_sol[node%640][node/640] = stoi(str); //node,step
+					node += 1;
+				}
+			}
+		}
 	strstream << fin3.rdbuf();
 	fin3.close();
-	*/
+	
 	////////////////////ファイル読み込み終了////////////////////
 
 	////////////////////重心の位置、法線ベクトルの計算////////////////////
