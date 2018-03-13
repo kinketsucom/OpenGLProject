@@ -415,6 +415,7 @@ float FjT_k(int mesh_k, float dot_k, float r, float T) {//SecondLayer計算用
 	return result;
 }
 
+
 /*
 *    main関数
 *        glutを使ってウインドウを作るなどの処理をする
@@ -474,33 +475,40 @@ int main(int argc, char *argv[])
 	strstream << fin2.rdbuf();
 	fin2.close();
 
+
 	
 	//boundary_sol
-	std::ifstream fin3( ".\\Resource\\boundary_sol.d" );
-		if( !fin3 ){
-			printf("boundary_solファイルが存在しません");
-			system("pause");
-			return 1;
-		}else{
-			int node = 0;
-			while (getline(fin3, str,' ')){
-				if(str == "" || str == "\n"){//空文字と改行コードをはじく
-					continue;
-				}else{
-					int log = node%1024000;
-					if(log ==0){
-						std::cout << std::to_string(node/102400) << "%" << std::endl;
-					}
-					//640要素でループ
-					boundary_sol[node%640][node/640] = stoi(str); //node,step
-					node += 1;
-				}
-			}
-		}
-	strstream << fin3.rdbuf();
-	fin3.close();
+	//std::ifstream fin3( ".\\Resource\\boundary_sol.d" );
+	//	if( !fin3 ){
+	//		printf("boundary_solファイルが存在しません");
+	//		system("pause");
+	//		return 1;
+	//	}else{
+	//		int node = 0;
+	//		while (getline(fin3, str,' ')){
+	//			if(str == "" || str == "\n"){//空文字と改行コードをはじく
+	//				continue;
+	//			}else{
+	//				int log = node%1024000;
+	//				if(log ==0){
+	//					std::cout << std::to_string(node/102400) << "%" << std::endl;
+	//				}
+	//				//640要素でループ
+	//				boundary_sol[node%640][node/640] = stoi(str); //node,step
+	//				node += 1;
+	//			}
+	//		}
+	//	}
+	//strstream << fin3.rdbuf();
+	//fin3.close();
+	
+	cout << "読み込み終了" << endl;
 	
 	////////////////////ファイル読み込み終了////////////////////
+
+
+
+
 
 	////////////////////重心の位置、法線ベクトルの計算////////////////////
 	for (int k = 0; k<640; k++) {//重心中心取得
