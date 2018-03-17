@@ -1,6 +1,4 @@
 ﻿  main.cpp
-c:\users\sekib\documents\undercreation\openglproject\openglproject\main.cpp(377): warning C4244: '初期化中': '__int64' から 'float' への変換です。データが失われる可能性があります。
-c:\users\sekib\documents\undercreation\openglproject\openglproject\main.cpp(390): warning C4244: '初期化中': '__int64' から 'float' への変換です。データが失われる可能性があります。
-c:\users\sekib\documents\undercreation\openglproject\openglproject\main.cpp(407): warning C4244: '引数': 'int' から 'float' への変換です。データが失われる可能性があります。
-c:\users\sekib\documents\undercreation\openglproject\openglproject\main.cpp(461): warning C4244: '=': 'double' から 'float' への変換です。データが失われる可能性があります。
+c:\users\sekib\documents\undercreation\openglproject\openglproject\main.cpp(159): warning C4838: 'double' から 'GLfloat' への変換には縮小変換が必要です
+c:\users\sekib\documents\undercreation\openglproject\openglproject\main.cpp(159): warning C4305: '初期化中': 'double' から 'GLfloat' へ切り詰めます。
   OpenGLProject.vcxproj -> C:\Users\sekib\Documents\UnderCreation\OpenGLProject\Debug\OpenGLProject.exe

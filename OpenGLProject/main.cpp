@@ -9,7 +9,8 @@
 #include <fstream>
 #include <sstream>
 #include <math.h>
-#include<fstream>
+#include <fstream>
+
 
 using namespace std;
 
@@ -21,7 +22,7 @@ GLfloat move_size = 1.0;
 
 //ŠÖ”ƒvƒƒgƒ^ƒCƒvéŒ¾
 float SL_k(int mesh_k, int step, float dot_k, float r_k);
-float FjT_k(int mesh_k, float dot_k, float r, float T);
+float FjT_k(int mesh_k, float dot_k, float r, int T);
 
 //ŒvZƒtƒF[ƒY‚É•K—v‚È‚à‚Ì
 bool start_bool = false;
@@ -62,8 +63,8 @@ ofstream outputfile("./Output/test.txt");
 
 class Camera {
 public:
-	VECTOR3 position = { 0,0,20 };
-	VECTOR3 viewpoint = { 0,0,0 };
+	VECTOR3 position = { 0.25 ,0.25,-4.0};
+	VECTOR3 viewpoint = { 0.25,0.25,0 };
 	void showPos() {//ƒfƒoƒbƒO—pŠÖ”
 		printf("position:(%f,%f,%f)\n", position.x, position.y, position.z);
 	}
@@ -147,6 +148,18 @@ GLuint make_cube(void)
 
 	/* —§•û‘Ì‚Ì’¸“_ */
 	static GLfloat vert[][4] = {
+		{ 0.0,  0.0, 0.0 },
+	{ 0.0,  0.5,  0.0 },
+	{ 0.5, 0.5,  0.0 },
+	{ 0.5, 0.0,  0.0 },
+	{ 0.0,  0.0, 0.15 },
+	{ 0.0,  0.5, 0.15 },
+	{ 0.5, 0.5, 0.15 },
+	{ 0.5, 0.0, 0.15 },
+	};
+
+
+	/*{
 		{ 1.0,  1.0,  1.0 },
 	{ -1.0,  1.0,  1.0 },
 	{ -1.0, -1.0,  1.0 },
@@ -155,7 +168,7 @@ GLuint make_cube(void)
 	{ -1.0,  1.0, -1.0 },
 	{ -1.0, -1.0, -1.0 },
 	{ 1.0, -1.0, -1.0 },
-	};
+	};*/
 
 	/* —§•û‘Ì‚Ì–Ê‚ÌF */
 	static GLfloat color[][4] = {
@@ -374,7 +387,7 @@ void loop() {
 
 
 					end_time = std::chrono::system_clock::now();  // Œv‘ªI—¹ŠÔ
-					float elapsed = std::chrono::duration_cast<std::chrono::microseconds>(end_time - start).count();
+					float elapsed = (float)std::chrono::duration_cast<std::chrono::microseconds>(end_time - start).count();
 					//            if(elapsed>=step_duration){
 					//                printf("*over*%1f [ƒÊs]\n",elapsed);
 					//            }else{
@@ -387,7 +400,7 @@ void loop() {
 				start_bool = false;
 
 				end_all = std::chrono::system_clock::now();  // Œv‘ªI—¹ŠÔ
-				float elapsed_all = std::chrono::duration_cast<std::chrono::milliseconds>(end_all - start_all).count(); //ˆ—‚É—v‚µ‚½ŠÔ‚ğƒ~ƒŠ•b‚É•ÏŠ·
+				float elapsed_all = (float)std::chrono::duration_cast<std::chrono::milliseconds>(end_all - start_all).count(); //ˆ—‚É—v‚µ‚½ŠÔ‚ğƒ~ƒŠ•b‚É•ÏŠ·
 				printf("all_end:%1f [ms]\n", elapsed_all);
 			}
 		}
@@ -403,12 +416,12 @@ float SL_k(int mesh_k, int step, float dot_k, float r_k) {//ƒƒbƒVƒ…k‚É‚Â‚¢‚ÄŒv
 	int m1 = 0;
 	int m2 = 0;
 	m1 = (int)(n - r_k * samplerate / wave_speed) + 1;
-	m2 = (int)m2-1;
+	m2 = (int)m1-1;
 	result = FjT_k(mesh_k, dot_k, r_k, (n - m1 + 1)) * bc_u[mesh_k][m1] + FjT_k(mesh_k, dot_k, r_k, (m2 - n + 1))*bc_u[mesh_k][m2];
 	return result;
 }
 
-float FjT_k(int mesh_k, float dot_k, float r, float T) {//SecondLayerŒvZ—p
+float FjT_k(int mesh_k, float dot_k, float r, int T) {//SecondLayerŒvZ—p
 	float del_t = 1.0f / samplerate;
 	float result = 0.0f;
 	result = - dot_k * mesh_size[mesh_k] * T / (4.0f * pi * r*r*r);
@@ -440,7 +453,7 @@ int main(int argc, char *argv[])
 				continue;
 			}
 			else {
-				meshpoint[node / 3][node % 3] = stod(str);
+				meshpoint[node / 3][node % 3] = (float)stod(str);
 				node += 1;
 			}
 		}
@@ -494,7 +507,8 @@ int main(int argc, char *argv[])
 	//					std::cout << std::to_string(node/102400) << "%" << std::endl;
 	//				}
 	//				//640—v‘f‚Åƒ‹[ƒv
-	//				boundary_sol[node%640][node/640] = stoi(str); //node,step
+	//				boundary_sol[node%640][node/640] = (float)stod(str); //node,step
+	//				bc_u[node % 640][node / 640] = boundary_sol[node % 640][node / 640];
 	//				node += 1;
 	//			}
 	//		}
@@ -529,7 +543,7 @@ int main(int argc, char *argv[])
 		/*mesh_point_center_norm[k][0] = norm.x;
 		mesh_point_center_norm[k][1] = norm.y;
 		mesh_point_center_norm[k][2] = norm.z;*/
-		mesh_k_center[k] = norm;
+		mesh_k_norm[k] = norm;
 	}
 	////////////////////dS‚ÌˆÊ’uA–@üƒxƒNƒgƒ‹‚ÌŒvZI—¹////////////////////
 	///////////////////////“üË”g‚ÌŒvZ///////////////////////////
