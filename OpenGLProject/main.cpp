@@ -14,11 +14,12 @@
 
 using namespace std;
 
+//画面描画の設定など
 static GLfloat rot_y, rot_x;    /* 立方体の回転角度 */
 static GLfloat bgn_y, bgn_x;    /* ドラッグ開始時の回転角度 */
 static int mouse_x, mouse_y;    /* ドラッグ開始時のマウスの位置 */
 static GLuint cubelist;            /* 立方体のリスト */
-GLfloat move_size = 1.0;
+GLfloat move_size = 0.1;
 
 //関数プロトタイプ宣言
 float SL_k(int mesh_k, int step, float dot_k, float r_k);
@@ -63,7 +64,7 @@ ofstream outputfile("./Output/test.txt");
 
 class Camera {
 public:
-	VECTOR3 position = { 0.25 ,0.25,-4.0};
+	VECTOR3 position = { 0.25 ,0.25,-0.9};
 	VECTOR3 viewpoint = { 0.25,0.25,0 };
 	void showPos() {//デバッグ用関数
 		printf("position:(%f,%f,%f)\n", position.x, position.y, position.z);
@@ -364,7 +365,7 @@ void loop() {
 							//r_k = position.DummyDistance(mesh_k_center[k]);//ダミー
 							delayf_k_part[k] = samplerate * r_k / wave_speed;
 							delayf_k[k] = i - delayf_k_part[k];
-							int delay_k = (int)delayf_k;
+							int delay_k = (int)delayf_k[k];
 							if (delay_k > 0) {
 								//これが新しいやつ
 								u_array += -SL_k(k, i, dot_k, r_k);
@@ -374,7 +375,7 @@ void loop() {
 						for (int k = 0; k < 640; k++) {//各メッシュに対する計算ループ
 							//内点計算
 							delayf_k[k] = i - delayf_k_part[k];
-							int delay_k = (int)delayf_k;
+							int delay_k = (int)delayf_k[k];
 							if (delay_k > 0) {
 								//これが新しいやつ
 								u_array += -SL_k(k, i, dot_k, r_k);
@@ -488,33 +489,31 @@ int main(int argc, char *argv[])
 	strstream << fin2.rdbuf();
 	fin2.close();
 
-
-	
 	//boundary_sol
-	//std::ifstream fin3( ".\\Resource\\boundary_sol.d" );
-	//	if( !fin3 ){
-	//		printf("boundary_solファイルが存在しません");
-	//		system("pause");
-	//		return 1;
-	//	}else{
-	//		int node = 0;
-	//		while (getline(fin3, str,' ')){
-	//			if(str == "" || str == "\n"){//空文字と改行コードをはじく
-	//				continue;
-	//			}else{
-	//				int log = node%1024000;
-	//				if(log ==0){
-	//					std::cout << std::to_string(node/102400) << "%" << std::endl;
-	//				}
-	//				//640要素でループ
-	//				boundary_sol[node%640][node/640] = (float)stod(str); //node,step
-	//				bc_u[node % 640][node / 640] = boundary_sol[node % 640][node / 640];
-	//				node += 1;
-	//			}
-	//		}
-	//	}
-	//strstream << fin3.rdbuf();
-	//fin3.close();
+	std::ifstream fin3( ".\\Resource\\boundary_sol.d" );
+		if( !fin3 ){
+			printf("boundary_solファイルが存在しません");
+			system("pause");
+			return 1;
+		}else{
+			int node = 0;
+			while (getline(fin3, str,' ')){
+				if(str == "" || str == "\n"){//空文字と改行コードをはじく
+					continue;
+				}else{
+					int log = node%1024000;
+					if(log ==0){
+						std::cout << std::to_string(node/102400) << "%" << std::endl;
+					}
+					//640要素でループ
+					boundary_sol[node%640][node/640] = (float)stod(str); //node,step
+					bc_u[node % 640][node / 640] = boundary_sol[node % 640][node / 640];
+					node += 1;
+				}
+			}
+		}
+	strstream << fin3.rdbuf();
+	fin3.close();
 	
 	cout << "読み込み終了" << endl;
 	

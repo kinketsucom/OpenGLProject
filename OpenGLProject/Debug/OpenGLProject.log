@@ -1,4 +1,6 @@
 ﻿  main.cpp
-c:\users\sekib\documents\undercreation\openglproject\openglproject\main.cpp(159): warning C4838: 'double' から 'GLfloat' への変換には縮小変換が必要です
-c:\users\sekib\documents\undercreation\openglproject\openglproject\main.cpp(159): warning C4305: '初期化中': 'double' から 'GLfloat' へ切り詰めます。
+c:\users\sekib\documents\undercreation\openglproject\openglproject\main.cpp(22): warning C4305: '初期化中': 'double' から 'GLfloat' へ切り詰めます。
+c:\users\sekib\documents\undercreation\openglproject\openglproject\main.cpp(67): warning C4305: '引数': 'double' から 'float' へ切り詰めます。
+c:\users\sekib\documents\undercreation\openglproject\openglproject\main.cpp(160): warning C4838: 'double' から 'GLfloat' への変換には縮小変換が必要です
+c:\users\sekib\documents\undercreation\openglproject\openglproject\main.cpp(160): warning C4305: '初期化中': 'double' から 'GLfloat' へ切り詰めます。
   OpenGLProject.vcxproj -> C:\Users\sekib\Documents\UnderCreation\OpenGLProject\Debug\OpenGLProject.exe
