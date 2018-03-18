@@ -27,8 +27,10 @@ float FjT_k(int mesh_k, float dot_k, float r, int T);
 
 //計算フェーズに必要なもの
 bool start_bool = false;
-float dot_k = 0;
-float r_k = 0;
+//float dot_k = 0;
+float dot_k[640];
+float r_k[640];
+//float r_k = 0;
 float delayf_k_part[640];
 float delayf_k[640];
 
@@ -60,7 +62,8 @@ float f[16000 * 2];
 //static float step_duration = (float)18000000.0 / samplerate; //μ秒
 std::chrono::system_clock::time_point  start, end_time, start_all, end_all; // 型は auto で可
 
-ofstream outputfile("./Output/test.txt");
+ofstream outputfile("./Output/u_array.txt");
+
 
 class Camera {
 public:
@@ -335,20 +338,6 @@ void skey_func(int key, int x, int y)
 
 void loop() {
 
-	//    int j = 0;
-	//    while(1){
-	//        start = std::chrono::system_clock::now(); // 計測開始時間
-	//        j += 1;
-	////        printf("step:%d\n",j);
-	////1万ループ程度が限界？
-	//
-	////        cam.showPos();
-	//        end = std::chrono::system_clock::now();  // 計測終了時間
-	//        float elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count(); //処理に要した時間をミリ秒に変換
-	////        printf("%1f [ms]\n",elapsed);
-	//    }
-
-
 		while (1) {
 			if (start_bool) {
 				start_all = std::chrono::system_clock::now();
@@ -360,15 +349,15 @@ void loop() {
 					if (i % 60 == 0) {//位置情報更新
 						//内点計算
 						for (int k = 0; k < 640; k++) {//各メッシュに対する計算ループ
-							dot_k = (position - mesh_k_center[k]).Dot(mesh_k_norm[k]);
-							r_k = position.Distance(mesh_k_center[k]);
+							dot_k[k] = (position - mesh_k_center[k]).Dot(mesh_k_norm[k]);
+							r_k[k] = position.Distance(mesh_k_center[k]);
 							//r_k = position.DummyDistance(mesh_k_center[k]);//ダミー
-							delayf_k_part[k] = samplerate * r_k / wave_speed;
+							delayf_k_part[k] = samplerate * r_k[k] / wave_speed;
 							delayf_k[k] = i - delayf_k_part[k];
 							int delay_k = (int)delayf_k[k];
 							if (delay_k > 0) {
 								//これが新しいやつ
-								u_array += -SL_k(k, i, dot_k, r_k);
+								u_array += -SL_k(k, i, dot_k[k], r_k[k]);
 							}
 						}
 					}else {//位置は同じ
@@ -378,7 +367,7 @@ void loop() {
 							int delay_k = (int)delayf_k[k];
 							if (delay_k > 0) {
 								//これが新しいやつ
-								u_array += -SL_k(k, i, dot_k, r_k);
+								u_array += -SL_k(k, i, dot_k[k], r_k[k]);
 							}
 						}
 					}
@@ -490,33 +479,34 @@ int main(int argc, char *argv[])
 	fin2.close();
 
 	//boundary_sol
-	std::ifstream fin3( ".\\Resource\\boundary_sol.d" );
-		if( !fin3 ){
-			printf("boundary_solファイルが存在しません");
-			system("pause");
-			return 1;
-		}else{
-			int node = 0;
-			while (getline(fin3, str,' ')){
-				if(str == "" || str == "\n"){//空文字と改行コードをはじく
-					continue;
-				}else{
-					int log = node%1024000;
-					if(log ==0){
-						std::cout << std::to_string(node/102400) << "%" << std::endl;
-					}
-					//640要素でループ
-					boundary_sol[node%640][node/640] = (float)stod(str); //node,step
-					bc_u[node % 640][node / 640] = boundary_sol[node % 640][node / 640];
-					node += 1;
-				}
-			}
-		}
-	strstream << fin3.rdbuf();
-	fin3.close();
+	//std::ifstream fin3( ".\\Resource\\boundary_sol.d" );
+	//	if( !fin3 ){
+	//		printf("boundary_solファイルが存在しません");
+	//		system("pause");
+	//		return 1;
+	//	}else{
+	//		int node = 0;
+	//		while (getline(fin3, str,' ')){
+	//			if(str == "" || str == "\n"){//空文字と改行コードをはじく
+	//				continue;
+	//			}else{
+	//				int log = node%1024000;
+	//				if(log ==0){
+	//					std::cout << std::to_string(node/102400) << "%" << std::endl;
+	//				}
+	//				//640要素でループ
+	//				boundary_sol[node%640][node/640] = (float)stod(str); //node,step
+	//				bc_u[node % 640][node / 640] = boundary_sol[node % 640][node / 640];
+	//				node += 1;
+	//			}
+	//		}
+	//	}
+	//strstream << fin3.rdbuf();
+	//fin3.close();
 	
 	cout << "読み込み終了" << endl;
-	
+
+
 	////////////////////ファイル読み込み終了////////////////////
 
 
@@ -542,7 +532,8 @@ int main(int argc, char *argv[])
 		/*mesh_point_center_norm[k][0] = norm.x;
 		mesh_point_center_norm[k][1] = norm.y;
 		mesh_point_center_norm[k][2] = norm.z;*/
-		mesh_k_norm[k] = norm;
+		VECTOR3 zero = { 0,0,0 };
+		mesh_k_norm[k] = zero-norm;//プラスマイナス反転
 	}
 	////////////////////重心の位置、法線ベクトルの計算終了////////////////////
 	///////////////////////入射波の計算///////////////////////////
@@ -554,6 +545,7 @@ int main(int argc, char *argv[])
 		//			}
 	}
 	///////////////////////入射波の計算終了///////////////////////////
+	
 
 
 	std::thread t1(loop);
