@@ -14,6 +14,11 @@
 
 using namespace std;
 
+//ファイル保存stream
+ofstream outputfile("./Output/u_array.txt");
+ofstream testrk("./Output/rk.txt");
+
+
 //画面描画の設定など
 static GLfloat rot_y, rot_x;    /* 立方体の回転角度 */
 static GLfloat bgn_y, bgn_x;    /* ドラッグ開始時の回転角度 */
@@ -62,7 +67,7 @@ float f[16000 * 2];
 //static float step_duration = (float)18000000.0 / samplerate; //μ秒
 std::chrono::system_clock::time_point  start, end_time, start_all, end_all; // 型は auto で可
 
-ofstream outputfile("./Output/u_array.txt");
+
 
 
 class Camera {
@@ -85,9 +90,96 @@ public:
 /*カメラオブジェクトのインスタンス化*/
 Camera cam;
 
-/*
-* キーが押されたときの処理
-*/
+
+
+void loop() {
+
+		while (1) {
+			if (start_bool) {
+				start_all = std::chrono::system_clock::now();
+				for (int i = 0; i < 16000; i++) {
+					start = std::chrono::system_clock::now(); // 計測開始時間
+					//cout << "step:" << i << endl;
+					float u_array = 0;
+					VECTOR3 position = cam.position;
+					//if (i % 60 == 0) {//位置情報更新
+					//	//内点計算
+						for (int k = 0; k < 640; k++) {//各メッシュに対する計算ループ
+							dot_k[k] = (position - mesh_k_center[k]).Dot(mesh_k_norm[k]);
+							r_k[k] = position.Distance(mesh_k_center[k]);
+							//r_k = position.DummyDistance(mesh_k_center[k]);//ダミー
+							delayf_k_part[k] = samplerate * r_k[k] / wave_speed;
+							delayf_k[k] = i - delayf_k_part[k];
+							int delay_k = (int)delayf_k[k];
+							if (delay_k > 0) {
+								//これが新しいやつ
+								u_array += -SL_k(k, i, dot_k[k], r_k[k],delay_k);
+								
+								if (k == 0) {
+									testrk << r_k[k] << endl;
+								}
+
+							}
+						}
+					//}else {//位置は同じ
+					//	for (int k = 0; k < 640; k++) {//各メッシュに対する計算ループ
+					//		//内点計算
+					//		delayf_k[k] = i - delayf_k_part[k];
+					//		int delay_k = (int)delayf_k[k];
+					//		if (delay_k > 0) {
+					//			//これが新しいやつ
+					//			u_array += -SL_k(k, i, dot_k[k], r_k[k],delay_k);
+					//		}
+					//	}
+					//}
+
+					//u_array += f[i];
+					outputfile << u_array << endl;
+
+
+					end_time = std::chrono::system_clock::now();  // 計測終了時間
+					float elapsed = (float)std::chrono::duration_cast<std::chrono::microseconds>(end_time - start).count();
+					//            if(elapsed>=step_duration){
+					//                printf("*over*%1f [μs]\n",elapsed);
+					//            }else{
+					//                printf("%1f [μs]\n",elapsed);
+					//                usleep(step_duration-elapsed-1);
+					//            }
+				}
+
+				//一回分しかまわさないテストのため
+				start_bool = false;
+
+				end_all = std::chrono::system_clock::now();  // 計測終了時間
+				float elapsed_all = (float)std::chrono::duration_cast<std::chrono::milliseconds>(end_all - start_all).count(); //処理に要した時間をミリ秒に変換
+				printf("all_end:%1f [ms]\n", elapsed_all);
+			}
+		}
+
+}
+
+
+
+float SL_k(int mesh_k, int step, float dot_k, float r_k,int delay_k) {//メッシュkについて計算する
+	float result = 0.0f;
+	int n = step;
+	int m1 = delay_k;
+	int m2 = delay_k-1;
+	result = FjT_k(mesh_k, dot_k, r_k, (n - m1 + 1)) * bc_u[mesh_k][m1] + FjT_k(mesh_k, dot_k, r_k, (m2 - n + 1))*bc_u[mesh_k][m2];
+	return result;
+}
+
+float FjT_k(int mesh_k, float dot_k, float r, int T) {//SecondLayer計算用
+	float result = 0.0f;
+	//FIXIT
+	//dot_kにマイナスがつくかは不明
+	//unityではついてない、こっちではついてた
+	//いまはunityにあわせている
+	result = dot_k * mesh_size[mesh_k] * T / (4.0f * pi * r*r*r);
+	return result;
+}
+
+//キーが押された時の処理
 void key_func(unsigned char key, int x, int y)
 {
 	switch (toupper(key)) {
@@ -106,7 +198,7 @@ void key_func(unsigned char key, int x, int y)
 		else {
 			cout << "stop" << endl;
 		}
-		
+
 		break;
 
 	case 'P':    /* Pキー */
@@ -115,10 +207,7 @@ void key_func(unsigned char key, int x, int y)
 	}
 }
 
-
-/*
-*    画面更新時の処理
-*/
+//画面更新時の処理
 void display_func(void)
 {
 	/*　画面と、デプスバッファを消去 */
@@ -142,10 +231,7 @@ void display_func(void)
 	glutSwapBuffers();
 }
 
-
-/*
-*    立方体のリストを作成
-*/
+//立方体のリストを作成
 GLuint make_cube(void)
 {
 	GLint list;
@@ -164,7 +250,7 @@ GLuint make_cube(void)
 
 
 	/*{
-		{ 1.0,  1.0,  1.0 },
+	{ 1.0,  1.0,  1.0 },
 	{ -1.0,  1.0,  1.0 },
 	{ -1.0, -1.0,  1.0 },
 	{ 1.0, -1.0,  1.0 },
@@ -237,9 +323,7 @@ GLuint make_cube(void)
 	return list;
 }
 
-/*
-*    ウインドウサイズ更新時の処理
-*/
+//ウインドウサイズ更新時の処理
 void reshape_func(int width, int height)
 {
 	/* 表示範囲設定 */
@@ -254,9 +338,7 @@ void reshape_func(int width, int height)
 	glMatrixMode(GL_MODELVIEW);
 }
 
-/*
-*    マウスクリック時の処理
-*/
+//マウスクリック時の処理
 void mouse_func(int button, int stat, int x, int y)
 {
 	if (GLUT_DOWN == stat && GLUT_LEFT == button) {
@@ -269,9 +351,7 @@ void mouse_func(int button, int stat, int x, int y)
 	}
 }
 
-/*
-*    マウスドラッグ時の処理
-*/
+//マウスドラッグ時の処理
 void drag_func(int x, int y)
 {
 	/* 回転角度を求める */
@@ -290,11 +370,7 @@ void drag_func(int x, int y)
 	glutPostRedisplay();
 }
 
-
-
-/*
-*    特殊キーが押されたときの処理
-*/
+//特殊キーが押されたときの処理
 void skey_func(int key, int x, int y)
 {
 	switch (key) {
@@ -336,90 +412,9 @@ void skey_func(int key, int x, int y)
 	glutPostRedisplay();
 }
 
-void loop() {
 
-		while (1) {
-			if (start_bool) {
-				start_all = std::chrono::system_clock::now();
-				for (int i = 0; i < 16000; i++) {
-					start = std::chrono::system_clock::now(); // 計測開始時間
-					//cout << "step:" << i << endl;
-					float u_array = 0;
-					VECTOR3 position = cam.position;
-					if (i % 60 == 0) {//位置情報更新
-						//内点計算
-						for (int k = 0; k < 640; k++) {//各メッシュに対する計算ループ
-							dot_k[k] = (position - mesh_k_center[k]).Dot(mesh_k_norm[k]);
-							r_k[k] = position.Distance(mesh_k_center[k]);
-							//r_k = position.DummyDistance(mesh_k_center[k]);//ダミー
-							delayf_k_part[k] = samplerate * r_k[k] / wave_speed;
-							delayf_k[k] = i - delayf_k_part[k];
-							int delay_k = (int)delayf_k[k];
-							if (delay_k > 0) {
-								//これが新しいやつ
-								u_array += -SL_k(k, i, dot_k[k], r_k[k],delay_k);
-							}
-						}
-					}else {//位置は同じ
-						for (int k = 0; k < 640; k++) {//各メッシュに対する計算ループ
-							//内点計算
-							delayf_k[k] = i - delayf_k_part[k];
-							int delay_k = (int)delayf_k[k];
-							if (delay_k > 0) {
-								//これが新しいやつ
-								u_array += -SL_k(k, i, dot_k[k], r_k[k],delay_k);
-							}
-						}
-					}
-
-					//u_array += f[i];
-					outputfile << u_array << endl;
-
-
-					end_time = std::chrono::system_clock::now();  // 計測終了時間
-					float elapsed = (float)std::chrono::duration_cast<std::chrono::microseconds>(end_time - start).count();
-					//            if(elapsed>=step_duration){
-					//                printf("*over*%1f [μs]\n",elapsed);
-					//            }else{
-					//                printf("%1f [μs]\n",elapsed);
-					//                usleep(step_duration-elapsed-1);
-					//            }
-				}
-
-				//テストケース
-				start_bool = false;
-
-				end_all = std::chrono::system_clock::now();  // 計測終了時間
-				float elapsed_all = (float)std::chrono::duration_cast<std::chrono::milliseconds>(end_all - start_all).count(); //処理に要した時間をミリ秒に変換
-				printf("all_end:%1f [ms]\n", elapsed_all);
-			}
-		}
-
-}
-
-
-
-float SL_k(int mesh_k, int step, float dot_k, float r_k,int delay_k) {//メッシュkについて計算する
-	float result = 0.0f;
-	int n = step;
-	int m1 = delay_k;
-	int m2 = delay_k-1;
-	result = FjT_k(mesh_k, dot_k, r_k, (n - m1 + 1)) * bc_u[mesh_k][m1] + FjT_k(mesh_k, dot_k, r_k, (m2 - n + 1))*bc_u[mesh_k][m2];
-	return result;
-}
-
-float FjT_k(int mesh_k, float dot_k, float r, int T) {//SecondLayer計算用
-	float del_t = 1.0f / samplerate;
-	float result = 0.0f;
-	result = - dot_k * mesh_size[mesh_k] * T / (4.0f * pi * r*r*r);
-	return result;
-}
-
-
-/*
-*    main関数
-*        glutを使ってウインドウを作るなどの処理をする
-*/
+//main関数
+//glutを使ってウインドウを作るなどの処理をする
 int main(int argc, char *argv[])
 {
 	printf("データを読み込み\n");
@@ -500,7 +495,7 @@ int main(int argc, char *argv[])
 	//	}
 	//strstream << fin3.rdbuf();
 	//fin3.close();
-	//
+	
 	cout << "読み込み終了" << endl;
 
 
@@ -580,3 +575,4 @@ int main(int argc, char *argv[])
 
 	return 0;
 }
+
