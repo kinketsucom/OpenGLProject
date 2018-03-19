@@ -22,7 +22,7 @@ static GLuint cubelist;            /* 立方体のリスト */
 GLfloat move_size = 0.1;
 
 //関数プロトタイプ宣言
-float SL_k(int mesh_k, int step, float dot_k, float r_k);
+float SL_k(int mesh_k, int step, float dot_k, float r_k,int delay_k);
 float FjT_k(int mesh_k, float dot_k, float r, int T);
 
 //計算フェーズに必要なもの
@@ -357,7 +357,7 @@ void loop() {
 							int delay_k = (int)delayf_k[k];
 							if (delay_k > 0) {
 								//これが新しいやつ
-								u_array += -SL_k(k, i, dot_k[k], r_k[k]);
+								u_array += -SL_k(k, i, dot_k[k], r_k[k],delay_k);
 							}
 						}
 					}else {//位置は同じ
@@ -367,7 +367,7 @@ void loop() {
 							int delay_k = (int)delayf_k[k];
 							if (delay_k > 0) {
 								//これが新しいやつ
-								u_array += -SL_k(k, i, dot_k[k], r_k[k]);
+								u_array += -SL_k(k, i, dot_k[k], r_k[k],delay_k);
 							}
 						}
 					}
@@ -399,14 +399,11 @@ void loop() {
 
 
 
-float SL_k(int mesh_k, int step, float dot_k, float r_k) {//メッシュkについて計算する
+float SL_k(int mesh_k, int step, float dot_k, float r_k,int delay_k) {//メッシュkについて計算する
 	float result = 0.0f;
-	float del_t = 1.0f / samplerate;
 	int n = step;
-	int m1 = 0;
-	int m2 = 0;
-	m1 = (int)(n - r_k * samplerate / wave_speed) + 1;
-	m2 = (int)m1-1;
+	int m1 = delay_k;
+	int m2 = delay_k-1;
 	result = FjT_k(mesh_k, dot_k, r_k, (n - m1 + 1)) * bc_u[mesh_k][m1] + FjT_k(mesh_k, dot_k, r_k, (m2 - n + 1))*bc_u[mesh_k][m2];
 	return result;
 }
@@ -503,7 +500,7 @@ int main(int argc, char *argv[])
 	//	}
 	//strstream << fin3.rdbuf();
 	//fin3.close();
-	
+	//
 	cout << "読み込み終了" << endl;
 
 
@@ -529,9 +526,6 @@ int main(int argc, char *argv[])
 		mesh_size[k] = (point0_1.Cross(point0_2)).Magnitude() / 2;
 		//法線ベクトル(ちょっと未確認)
 		VECTOR3 norm = point0_1.Cross(point0_2) / (point0_1.Cross(point0_2)).Magnitude();
-		/*mesh_point_center_norm[k][0] = norm.x;
-		mesh_point_center_norm[k][1] = norm.y;
-		mesh_point_center_norm[k][2] = norm.z;*/
 		VECTOR3 zero = { 0,0,0 };
 		mesh_k_norm[k] = zero-norm;//プラスマイナス反転
 	}
@@ -545,8 +539,6 @@ int main(int argc, char *argv[])
 		//			}
 	}
 	///////////////////////入射波の計算終了///////////////////////////
-	
-
 
 	std::thread t1(loop);
 	/* glutの初期化 */
