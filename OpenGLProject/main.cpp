@@ -534,17 +534,16 @@ int main(int argc, char *argv[])
 	}
 	///////////////////////ì¸éÀîgÇÃåvéZèIóπ///////////////////////////
 
-
 	ALuint buffer, source;
 	alutInit(&argc, argv);
-	//buffer = alutCreateBufferFromFile("./Resource/se.wav");
-	//alGenSources(1, &source);
-	//alSourcei(source, AL_BUFFER, buffer);
+	buffer = alutCreateBufferHelloWorld(); ;// alutCreateBufferFromFile("./Resource/se.wav");
+	alGenSources(1, &source);
+	alSourcei(source, AL_BUFFER, buffer);
 	//alSourcei(source, AL_LOOPING, AL_TRUE);
-	//alSourcePlay(source);
 	//alutSleep(1);
-	//getchar();
-	//alutExit();
+	alSourcePlay(source);
+	getchar();
+	alutExit();
 
 
 	std::thread t1(loop);
