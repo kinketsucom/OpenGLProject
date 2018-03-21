@@ -11,12 +11,16 @@
 #include <math.h>
 #include <fstream>
 
+//この３つは環境によってパスを変える必要があるかもしれない
+#include "al.h" 
+#include "alc.h" 
+#include "alut.h"
+
 
 using namespace std;
 
 //ファイル保存stream
 ofstream outputfile("./Output/u_array.txt");
-ofstream testrk("./Output/rk.txt");
 
 
 //画面描画の設定など
@@ -102,7 +106,7 @@ void loop() {
 					//cout << "step:" << i << endl;
 					float u_array = 0;
 					VECTOR3 position = cam.position;
-					//if (i % 60 == 0) {//位置情報更新
+					if (i % 133 == 0) {//位置情報更新
 					//	//内点計算
 						for (int k = 0; k < 640; k++) {//各メッシュに対する計算ループ
 							dot_k[k] = (position - mesh_k_center[k]).Dot(mesh_k_norm[k]);
@@ -114,26 +118,21 @@ void loop() {
 							if (delay_k > 0) {
 								//これが新しいやつ
 								u_array += -SL_k(k, i, dot_k[k], r_k[k],delay_k);
-								
-								if (k == 0) {
-									testrk << r_k[k] << endl;
-								}
-
 							}
 						}
-					//}else {//位置は同じ
-					//	for (int k = 0; k < 640; k++) {//各メッシュに対する計算ループ
-					//		//内点計算
-					//		delayf_k[k] = i - delayf_k_part[k];
-					//		int delay_k = (int)delayf_k[k];
-					//		if (delay_k > 0) {
-					//			//これが新しいやつ
-					//			u_array += -SL_k(k, i, dot_k[k], r_k[k],delay_k);
-					//		}
-					//	}
-					//}
+					}else {//位置は同じ
+						for (int k = 0; k < 640; k++) {//各メッシュに対する計算ループ
+							//内点計算
+							delayf_k[k] = i - delayf_k_part[k];
+							int delay_k = (int)delayf_k[k];
+							if (delay_k > 0) {
+								//これが新しいやつ
+								u_array += -SL_k(k, i, dot_k[k], r_k[k],delay_k);
+							}
+						}
+					}
 
-					//u_array += f[i];
+					u_array += f[i];
 					outputfile << u_array << endl;
 
 
@@ -534,6 +533,19 @@ int main(int argc, char *argv[])
 		//			}
 	}
 	///////////////////////入射波の計算終了///////////////////////////
+
+
+	ALuint buffer, source;
+	alutInit(&argc, argv);
+	//buffer = alutCreateBufferFromFile("./Resource/se.wav");
+	//alGenSources(1, &source);
+	//alSourcei(source, AL_BUFFER, buffer);
+	//alSourcei(source, AL_LOOPING, AL_TRUE);
+	//alSourcePlay(source);
+	//alutSleep(1);
+	//getchar();
+	//alutExit();
+
 
 	std::thread t1(loop);
 	/* glutの初期化 */
