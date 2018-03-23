@@ -33,6 +33,13 @@ GLfloat move_size = 0.1;
 //関数プロトタイプ宣言
 float SL_k(int mesh_k, int step, float dot_k, float r_k,int delay_k);
 float FjT_k(int mesh_k, float dot_k, float r, int T);
+int createBuffer();//バッファを作成するやつ
+
+//バッファ用意
+const int bufferFrequency = 8000;
+const int bufferSeconds = 2;
+
+
 
 //計算フェーズに必要なもの
 bool start_bool = false;
@@ -412,6 +419,9 @@ void skey_func(int key, int x, int y)
 }
 
 
+
+
+
 //main関数
 //glutを使ってウインドウを作るなどの処理をする
 int main(int argc, char *argv[])
@@ -534,56 +544,93 @@ int main(int argc, char *argv[])
 	}
 	///////////////////////入射波の計算終了///////////////////////////
 
-	ALuint buffer, source;
-	alutInit(&argc, argv);
-	buffer = alutCreateBufferHelloWorld(); ;// alutCreateBufferFromFile("./Resource/se.wav");
-	alGenSources(1, &source);
-	alSourcei(source, AL_BUFFER, buffer);
-	//alSourcei(source, AL_LOOPING, AL_TRUE);
-	//alutSleep(1);
-	alSourcePlay(source);
-	getchar();
-	alutExit();
 
+	//バッファとソースの定義
+	{
+		ALuint buffer, source;//バッファとソースの定義
+		alutInit(&argc, argv);//
+		alGenSources(1, &source);//音源sourceを作成(いくつ音源があるか,ソースの参照渡し)
+		buffer = createBuffer();
+		//buffer = alutCreateBufferFromFile("./Resource/se.wav");
+		alSourcei(source, AL_BUFFER, buffer);
+
+		////alSourcei(source, AL_LOOPING, AL_TRUE);
+		alSourcePlay(source);
+		alutSleep(4);
+		////getchar();
+		alutExit();
+		cout << "fin" << endl;
+	}
+	
 
 	std::thread t1(loop);
-	/* glutの初期化 */
-	glutInit(&argc, argv);
+	
+	//glut関係を以下にまとめた
+	{
+		/* glutの初期化 */
+		glutInit(&argc, argv);
 
-	/* 画面表示の設定 */
-	glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
+		/* 画面表示の設定 */
+		glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 
-	/* ウインドウの初期サイズを指定 */
-	glutInitWindowSize(300, 300);
+		/* ウインドウの初期サイズを指定 */
+		glutInitWindowSize(300, 300);
 
-	/* ウインドウを作る */
-	glutCreateWindow("glut window");
+		/* ウインドウを作る */
+		glutCreateWindow("glut window");
 
-	/*初期視点の設定*/
-	gluLookAt(cam.position.x, cam.position.y, cam.position.z, cam.viewpoint.x, cam.viewpoint.y, cam.viewpoint.z, 0, 1, 0);
+		/*初期視点の設定*/
+		gluLookAt(cam.position.x, cam.position.y, cam.position.z, cam.viewpoint.x, cam.viewpoint.y, cam.viewpoint.z, 0, 1, 0);
 
-	/* 画面更新用の関数を登録 */
-	glutDisplayFunc(display_func);
+		/* 画面更新用の関数を登録 */
+		glutDisplayFunc(display_func);
 
-	/* ウインドウのサイズ変更時の関数を登録 */
-	glutReshapeFunc(reshape_func);
+		/* ウインドウのサイズ変更時の関数を登録 */
+		glutReshapeFunc(reshape_func);
 
-	/* キーボード入力用関数を登録 */
-	glutKeyboardFunc(key_func);
-	glutSpecialFunc(skey_func);
+		/* キーボード入力用関数を登録 */
+		glutKeyboardFunc(key_func);
+		glutSpecialFunc(skey_func);
 
-	/* マウス用関数を登録 */
-	glutMotionFunc(drag_func);
-	glutMouseFunc(mouse_func);
+		/* マウス用関数を登録 */
+		glutMotionFunc(drag_func);
+		glutMouseFunc(mouse_func);
 
-	/* デプスバッファを使うように設定 */
-	glEnable(GL_DEPTH_TEST);
+		/* デプスバッファを使うように設定 */
+		glEnable(GL_DEPTH_TEST);
 
-	/* リストを作成 */
-	cubelist = make_cube();
-	/* イベント処理などを始める */
-	glutMainLoop();
-
+		/* リストを作成 */
+		cubelist = make_cube();
+		/* イベント処理などを始める */
+		glutMainLoop();
+	}
 	return 0;
+}
+
+int createBuffer()
+{
+	ALuint buffer;
+	alGenBuffers(1, &buffer);
+	unsigned int bufferData[bufferFrequency * bufferSeconds];
+
+	for (int i = 0; i < sizeof(bufferData)/ sizeof(bufferData[0]); i++)
+	{
+		float time = (double)i / bufferFrequency;
+		float frequency = 440;
+		float data = sin(time * frequency * pi * 2);
+		//FIXIT:0-255に正規化しているのではないか
+		bufferData[i] = (int)round(
+			255 * (data + 1) / 2 //MEMO:255はbytedata.maxvalue
+		);
+	}
+
+	alBufferData(
+		buffer,
+		AL_FORMAT_MONO8,
+		bufferData,
+		sizeof(bufferData)/ sizeof(bufferData[0]),
+		bufferFrequency
+	);
+	return buffer;
 }
 
