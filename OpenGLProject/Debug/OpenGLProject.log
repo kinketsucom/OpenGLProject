@@ -1,7 +1,7 @@
 ﻿  main.cpp
-c:\users\sekib\documents\undercreation\openglproject\openglproject\main.cpp(31): warning C4305: '初期化中': 'double' から 'GLfloat' へ切り詰めます。
-c:\users\sekib\documents\undercreation\openglproject\openglproject\main.cpp(86): warning C4305: '引数': 'double' から 'float' へ切り詰めます。
-c:\users\sekib\documents\undercreation\openglproject\openglproject\main.cpp(255): warning C4838: 'double' から 'GLfloat' への変換には縮小変換が必要です
-c:\users\sekib\documents\undercreation\openglproject\openglproject\main.cpp(255): warning C4305: '初期化中': 'double' から 'GLfloat' へ切り詰めます。
-c:\users\sekib\documents\undercreation\openglproject\openglproject\main.cpp(618): warning C4244: '初期化中': 'double' から 'float' への変換です。データが失われる可能性があります。
+c:\users\sekib\documents\undercreation\openglproject\openglproject\main.cpp(35): warning C4305: '初期化中': 'double' から 'GLfloat' へ切り詰めます。
+c:\users\sekib\documents\undercreation\openglproject\openglproject\main.cpp(257): warning C4838: 'double' から 'GLfloat' への変換には縮小変換が必要です
+c:\users\sekib\documents\undercreation\openglproject\openglproject\main.cpp(257): warning C4305: '初期化中': 'double' から 'GLfloat' へ切り詰めます。
+c:\users\sekib\documents\undercreation\openglproject\openglproject\main.cpp(561): warning C4244: '引数': 'const int' から 'ALfloat' への変換です。データが失われる可能性があります。
+c:\users\sekib\documents\undercreation\openglproject\openglproject\main.cpp(619): warning C4244: '初期化中': 'double' から 'float' への変換です。データが失われる可能性があります。
   OpenGLProject.vcxproj -> C:\Users\sekib\Documents\UnderCreation\OpenGLProject\Debug\OpenGLProject.exe

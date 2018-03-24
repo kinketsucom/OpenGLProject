@@ -21,7 +21,11 @@ using namespace std;
 
 //ƒtƒ@ƒCƒ‹•Û‘¶stream
 ofstream outputfile("./Output/u_array.txt");
+ofstream wavefile("./Output/wavefile.txt");
 
+//ƒoƒbƒtƒ@—pˆÓ
+const int bufferFrequency = 8000;
+const int bufferSeconds = 2;
 
 //‰æ–Ê•`‰æ‚Ìİ’è‚È‚Ç
 static GLfloat rot_y, rot_x;    /* —§•û‘Ì‚Ì‰ñ“]Šp“x */
@@ -35,9 +39,7 @@ float SL_k(int mesh_k, int step, float dot_k, float r_k,int delay_k);
 float FjT_k(int mesh_k, float dot_k, float r, int T);
 int createBuffer();//ƒoƒbƒtƒ@‚ğì¬‚·‚é‚â‚Â
 
-//ƒoƒbƒtƒ@—pˆÓ
-const int bufferFrequency = 8000;
-const int bufferSeconds = 2;
+
 
 
 
@@ -83,7 +85,7 @@ std::chrono::system_clock::time_point  start, end_time, start_all, end_all; // Œ
 
 class Camera {
 public:
-	VECTOR3 position = { 0.25 ,0.25,-0.9};
+	VECTOR3 position = { 0.25 ,0.25,-9};
 	VECTOR3 viewpoint = { 0.25,0.25,0 };
 	void showPos() {//ƒfƒoƒbƒO—pŠÖ”
 		printf("position:(%f,%f,%f)\n", position.x, position.y, position.z);
@@ -553,13 +555,12 @@ int main(int argc, char *argv[])
 		buffer = createBuffer();
 		//buffer = alutCreateBufferFromFile("./Resource/se.wav");
 		alSourcei(source, AL_BUFFER, buffer);
-
 		////alSourcei(source, AL_LOOPING, AL_TRUE);
+		cout << "play" << endl;
 		alSourcePlay(source);
-		alutSleep(4);
+		alutSleep(bufferSeconds);
 		////getchar();
 		alutExit();
-		cout << "fin" << endl;
 	}
 	
 
@@ -611,24 +612,27 @@ int createBuffer()
 {
 	ALuint buffer;
 	alGenBuffers(1, &buffer);
-	unsigned int bufferData[bufferFrequency * bufferSeconds];
+	unsigned char bufferData[bufferFrequency * bufferSeconds];
 
 	for (int i = 0; i < sizeof(bufferData)/ sizeof(bufferData[0]); i++)
 	{
 		float time = (double)i / bufferFrequency;
 		float frequency = 440;
 		float data = sin(time * frequency * pi * 2);
-		//FIXIT:0-255‚É³‹K‰»‚µ‚Ä‚¢‚é‚Ì‚Å‚Í‚È‚¢‚©
-		bufferData[i] = (int)round(
+		//0-255‚É³‹K‰»‚µ‚Ä‚¢‚é
+		bufferData[i] = (char)round(
 			255 * (data + 1) / 2 //MEMO:255‚Íbytedata.maxvalue
 		);
+		//bufferData[i] = data;
+		wavefile << bufferData[i] << endl;
+		//wavefile << data << endl;
 	}
 
 	alBufferData(
 		buffer,
 		AL_FORMAT_MONO8,
 		bufferData,
-		sizeof(bufferData)/ sizeof(bufferData[0]),
+		sizeof(bufferData),
 		bufferFrequency
 	);
 	return buffer;
